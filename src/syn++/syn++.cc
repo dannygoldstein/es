@@ -174,7 +174,13 @@ int main( int argc, char* argv[] )
         ES::Synow::Setup setup;
         *iter >> setup;
         grid( setup );
-        std::cout << output << std::endl;
+	
+	std::vector<ES::Synow::icoord> vec = spectrum.in( setup );
+
+	for (std::vector<ES::Synow::icoord>::iterator it = vec.begin(); it != vec.end(); it++){
+	  std::cout << it->v << std::endl << it->s << std::endl;
+	}
+        //std::cout << output << std::endl;
     }
 
     return 0;

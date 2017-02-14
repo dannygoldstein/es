@@ -98,12 +98,12 @@ void ES::Synow::Spectrum::operator() ( const ES::Synow::Setup& setup )
         {
             if( ip < _p_size )
             {
-                _in[ ip ] = (*_grid->bb)( _output->wl( iw ) * _min_shift[ ip ] ) * pow( _min_shift[ ip ], 3 );
-                _reference->flux( iw ) += _in[ ip ] * _p[ ip ] * p_step;
+                _in[ ip ][ iw ] = (*_grid->bb)( _output->wl( iw ) * _min_shift[ ip ] ) * pow( _min_shift[ ip ], 3 );
+                _reference->flux( iw ) += _in[ ip ][ iw ] * _p[ ip ] * p_step;
             }
             else
             {
-                _in[ ip ] = 0.0;
+                _in[ ip ][ iw ] = 0.0;
             }
         }
         _reference->flux( iw ) *= norm;
@@ -125,12 +125,12 @@ void ES::Synow::Spectrum::operator() ( const ES::Synow::Setup& setup )
                 double et = cl * _grid->tau[ offset + il ] + cu * _grid->tau[ offset + iu ];
                 double ss = cl * _grid->src[ offset + il ] + cu * _grid->src[ offset + iu ];
                 et = exp( - et );
-                _in[ ip ] = _in[ ip ] * et + ss * ( 1.0 - et ) * pow( zs, 3 );
+                _in[ ip ][ iw ] = _in[ ip ][ iw ] * et + ss * ( 1.0 - et ) * pow( zs, 3 );
             }
         }
 
         _output->flux( iw ) = 0.0;
-        for( int ip = 0; ip < p_outer; ++ ip ) _output->flux( iw ) += _in[ ip ] * _p[ ip ] * p_step;
+        for( int ip = 0; ip < p_outer; ++ ip ) _output->flux( iw ) += _in[ ip ][ iw ] * _p[ ip ] * p_step;
         _output->flux( iw ) *= norm;
 
     }
@@ -154,10 +154,29 @@ void ES::Synow::Spectrum::operator() ( const ES::Synow::Setup& setup )
 
 }
 
+std::vector<ES::Synow::icoord> ES::Synow::Spectrum::in ( const ES::Synow::Setup& setup ){
+  //this->operator()( setup );
+  std::vector<ES::Synow::icoord> vec;
+  for (int ip = 0; ip < _p_total; ip++){
+    double v = setup.v_phot * _p[ ip ];
+    ES::Spectrum s = ES::Spectrum::create_from_spectrum( *_output );
+    for (int iw = 0; iw < s.size(); iw++)
+      s.flux( iw ) = _in[ ip ][ iw ];
+    ES::Synow::icoord coord;
+    coord.v = v;
+    coord.s = s;
+    vec.push_back( coord );
+  }
+  return vec;
+}
+
 void ES::Synow::Spectrum::_alloc( bool const clear )
 {
     if( clear ) _clear();
-    _in        = new double [ _p_total ];
+    _in        = new double* [ _p_total ];
+    for (int ip = 0; ip < _p_total; ip++)
+      _in[ ip ] = new double [ _output->size() ];
+      
     _p         = new double [ _p_total ];
     _min_shift = new double [ _p_total ];
     _max_shift = new double [ _p_total ];
@@ -165,8 +184,10 @@ void ES::Synow::Spectrum::_alloc( bool const clear )
 
 void ES::Synow::Spectrum::_clear()
 {
-    delete [] _in;
-    delete [] _p;
-    delete [] _min_shift;
-    delete [] _max_shift;
+  for  (int ip = 0; ip < _p_total; ip++)
+    delete []  _in[ ip ];
+  delete [] _in;
+  delete [] _p;
+  delete [] _min_shift;
+  delete [] _max_shift;
 }

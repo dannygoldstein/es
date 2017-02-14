@@ -51,6 +51,11 @@ namespace ES
         /// No point in inheriting ES::Spectrum because you would have to
         /// duplicate basically a bunch of named constructors here.
 
+        typedef struct icoord {
+	  double v;
+	  ES::Spectrum s;
+	} icoord; 
+
         class Spectrum : public ES::Synow::Operator
         {
 
@@ -68,6 +73,8 @@ namespace ES
 
                 virtual void operator() ( const ES::Synow::Setup& setup );
 
+	        std::vector<ES::Synow::icoord> in( const ES::Synow::Setup& setup );
+
             private :
 
                 ES::Spectrum*  _output;     ///< Synthetic spectrum object.
@@ -77,7 +84,7 @@ namespace ES
 
                 int      _p_size;           ///< Number of impact parameters subtending photosphere.
                 int      _p_total;          ///< Total number of impact parameters subtending line-forming region.
-                double*  _in;               ///< Specific intensities.
+                double** _in;               ///< Specific intensities.
                 double*  _p;                ///< Impact parameters.
                 double*  _min_shift;        ///< Minimum first-order Doppler shift along each impact parameter.
                 double*  _max_shift;        ///< Maximum first-order Doppler shift along each impact parameter.
