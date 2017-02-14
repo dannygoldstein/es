@@ -11,8 +11,8 @@ grid :
     v_size      : 100           # size of line-forming region grid
     v_outer_max : 30.0          # fastest ejecta velocity in kkm/s
 opacity :
-    line_dir    : /Users/dgold/es-data/lines     # path to atomic line data
-    ref_file    : /Users/dgold/es-data/refs.dat  # path to ref. line data
+    line_dir    : es-data/lines     # path to atomic line data
+    ref_file    : es-data/refs.dat  # path to ref. line data
     form        : exp           # parameterization (only exp for now)
     v_ref       : 10.0          # reference velocity for parameterization
     log_tau_min : -2.0          # opacity threshold
